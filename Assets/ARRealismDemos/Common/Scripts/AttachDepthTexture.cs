@@ -38,10 +38,10 @@ public class AttachDepthTexture : MonoBehaviour
     private void Start()
     {
         _occlusionManager = FindObjectOfType<AROcclusionManager>();
-        Debug.Assert(_occlusionManager);
+       // Debug.Assert(_occlusionManager);
 
         _cameraManager = FindObjectOfType<ARCameraManager>();
-        Debug.Assert(_cameraManager);
+     //   Debug.Assert(_cameraManager);
 
         _cameraManager.frameReceived += OnCameraFrameReceived;
 

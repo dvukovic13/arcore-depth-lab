@@ -19,7 +19,9 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.IO;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
@@ -45,6 +47,8 @@ public class RawPointCloudBlender : MonoBehaviour
     /// </summary>
     public float OffsetFromCamera = 1.0f;
 
+    public Button Capture;
+
     // Limit the number of points to bound the performance cost of rendering the point cloud.
     private const int _maxVerticesInBuffer = 1000000;
     private const double _maxUpdateInvervalInSeconds = 0.5f;
@@ -54,6 +58,8 @@ public class RawPointCloudBlender : MonoBehaviour
     private ARCameraManager _cameraManager;
     private XRCameraIntrinsics _cameraIntrinsics;
     private Mesh _mesh;
+
+    public Camera RecordingCamera;
 
     private Vector3[] _vertices = new Vector3[_maxVerticesInBuffer];
     private int _verticesCount = 0;
@@ -75,6 +81,9 @@ public class RawPointCloudBlender : MonoBehaviour
     private Material _pointCloudMaterial;
     private bool _cachedUseRawDepth = false;
 
+
+    public TextAsset Output;
+
     /// <summary>
     /// Resets the point cloud renderer.
     /// </summary>
@@ -84,6 +93,27 @@ public class RawPointCloudBlender : MonoBehaviour
         _verticesIndex = 0;
     }
 
+    private Texture2D RTImage(int mWidth, int mHeight)
+    {
+        Rect rect = new Rect(0, 0, mWidth, mHeight);
+        RenderTexture renderTexture = new RenderTexture(mWidth, mHeight, 24);
+        Texture2D screenShot = new Texture2D(mWidth, mHeight, TextureFormat.RGBA32, false);
+
+        RecordingCamera.targetTexture = renderTexture;
+        RecordingCamera.Render();
+
+        RenderTexture.active = renderTexture;
+        screenShot.ReadPixels(rect, 0, 0);
+
+        RecordingCamera.targetTexture = null;
+        RenderTexture.active = null;
+
+        Destroy(renderTexture);
+        renderTexture = null;
+        return screenShot;
+    }
+
+
     private void Start()
     {
         _mesh = new Mesh();
@@ -91,6 +121,76 @@ public class RawPointCloudBlender : MonoBehaviour
         _pointCloudMaterial = GetComponent<Renderer>().material;
         _cameraManager = FindObjectOfType<ARCameraManager>();
         _cameraManager.frameReceived += OnCameraFrameReceived;
+        
+
+        Capture.onClick.AddListener(() => {
+
+            Texture2D tex = RTImage(Screen.width, Screen.height);
+            byte[] png = tex.EncodeToPNG();
+
+        //    foreach (byte bajt in png)
+        //        Debug.Log(bajt);
+
+
+          //  Debug.Log("Prvi bajt: " + tex.EncodeToPNG());
+
+            Debug.Log("Broj tacaka: " + _vertices.Length); 
+        
+            foreach(Vector3 vertex in _vertices)
+            {
+               Debug.Log(vertex.x + " " + vertex.y + " " + vertex.z);
+            }
+
+
+
+            string curFile = Application.persistentDataPath + "/points.txt";
+
+            if (File.Exists(curFile))
+            {
+                string line;
+                StreamReader be = new StreamReader(Application.persistentDataPath + "/points.txt");
+                line = be.ReadLine();
+               /* for (int i = 0; i < ach.Length; i++)
+                {
+                    one = be.ReadLine();
+                    if (one == "True")
+                    {
+                        ach[i] = true;
+                    }
+                    else
+                    {
+                        ach[i] = false;
+                    }
+                }*/
+                be.Close();
+            }
+            else
+            {
+                StreamWriter ki = new StreamWriter(Application.persistentDataPath + "/points.txt");
+                {
+                    // ki.WriteLine("");
+                    int no = 1;
+                    for(int i = 0; i < _vertices.Length; i++)
+                    {
+                        no++;
+                        if (no % 3 == 0)
+                        {
+                            ki.WriteLine(_vertices[i].x + " " + _vertices[i].y + " " + _vertices[i].z);
+                            no = 1;
+
+                        }
+                        // ki.WriteLine()
+                    }
+
+                    ki.Close();
+                }
+            }
+
+
+
+
+        });
+
 
         // Sets the index buffer.
         for (int i = 0; i < _maxVerticesInBuffer; ++i)
@@ -253,6 +353,11 @@ public class RawPointCloudBlender : MonoBehaviour
                 _vertices[_verticesIndex] = vertex;
                 _colors[_verticesIndex] = color;
                 ++_verticesIndex;
+
+
+              //  Debug.Log("X: " + vertex.x +" Y: " + vertex.y + " Z: " + vertex.z);
+
+
             }
         }
 
@@ -260,6 +365,13 @@ public class RawPointCloudBlender : MonoBehaviour
         {
             return;
         }
+
+
+     //   Debug.Log("Broj vertices: " + _verticesCount);
+    //    Debug.Log("Zadnja tacka: " + _vertices[_verticesCount-1]);
+
+
+      //  Debug.Log(_vertices[i]);
 
         // Assigns graphical buffers.
 #if UNITY_2019_3_OR_NEWER

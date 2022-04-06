@@ -47,7 +47,7 @@ public class ARBackgroundMaterialReplacer : MonoBehaviour
         }
 
         _backgroundRenderer = FindObjectOfType<ARCameraBackground>();
-        Debug.Assert(_backgroundRenderer);
+    //    Debug.Assert(_backgroundRenderer);
 
         _backgroundRenderer.useCustomMaterial = true;
         _backgroundRenderer.customMaterial = ReplacementMaterial;
