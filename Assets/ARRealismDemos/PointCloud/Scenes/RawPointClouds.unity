@@ -1401,6 +1401,7 @@ MonoBehaviour:
   ConfidenceSlider: {fileID: 1942039382}
   OffsetFromCamera: 1
   Capture: {fileID: 715252735}
+  RecordingCamera: {fileID: 1468060620}
   Output: {fileID: 4900000, guid: eed638ae17cd66144b69cf60a9d41d8d, type: 3}
 --- !u!33 &1513632182
 MeshFilter:
