@@ -122,8 +122,8 @@ public class RawPointCloudBlender : MonoBehaviour
     private void Awake()
     {
 
-        recorder = FindObjectOfType<Recorder>();
-    //    recorder.pcCamera = FindObjectOfType<Camera>().transform;
+       // recorder = Recorder.GetRecorder;
+      //  recorder.ActiveCamera = GameObject.Find("ARCamera").GetComponent<Camera>();
 
         if(!File.Exists(Application.persistentDataPath + path))
         {
@@ -219,6 +219,16 @@ public class RawPointCloudBlender : MonoBehaviour
         _updateInvervalInSeconds = Mathf.Lerp((float)_minUpdateInvervalInSeconds,
             (float)_maxUpdateInvervalInSeconds,
             normalizedDeltaTime);
+
+
+        if(recorder == null)
+        {
+            //recorder = Recorder.GetRecorder;
+            recorder = FindObjectOfType<Recorder>();
+            recorder.ActiveCamera = FindObjectOfType<Camera>();
+        }
+
+
     }
 
     void OnCameraFrameReceived(ARCameraFrameEventArgs eventArgs)

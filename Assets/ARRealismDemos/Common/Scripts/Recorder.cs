@@ -22,6 +22,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Google.XR.ARCoreExtensions;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -97,10 +98,20 @@ public class Recorder : MonoBehaviour
     private float _timeWhenRecorderStarts;
     private ARCoreRecordingConfig _recordingConfig = null;
 
-   // public Transform pcCamera;
-  //  private Track track;
+    // public Transform pcCamera;
+    private Track track;
+    private Camera pcCamera;
 
-   // private byte[] bytes = new byte[12];
+
+    public static Recorder GetRecorder; //{ get { return this; } }
+
+
+    public Camera ActiveCamera { get { return pcCamera; } set { pcCamera = value; } }
+
+
+    private byte[] bytes = new byte[12];
+
+    private List<byte> bytesList = new List<byte>();// = new byte[12];
 
     /// <summary>
     /// Status of the recorder. Only one workflow is enabled at a time:
@@ -165,6 +176,7 @@ public class Recorder : MonoBehaviour
             _recordingManager.StopRecording();
             _status = RecorderStatus.Stopped;
             ResetScenes();
+
         }
     }
 
@@ -239,15 +251,32 @@ public class Recorder : MonoBehaviour
         _timeWhenRecorderStarts = Time.time;
 
 
-      //  Debug.Log("camera: " + pcCamera);
-      //  Debug.Log("bytearray: " + bytes.Length);
-     //   Debug.Log("track: " + track);
+        Debug.Log("camera: " + pcCamera);
 
-        //Buffer.BlockCopy(BitConverter.GetBytes(pcCamera.position.x), 0, bytes, 0, 4);
-        //Buffer.BlockCopy(BitConverter.GetBytes(pcCamera.position.y), 0, bytes, 4, 4);
-        //Buffer.BlockCopy(BitConverter.GetBytes(pcCamera.position.z), 0, bytes, 8, 4);
+        if(pcCamera != null)
+        {
+            Buffer.BlockCopy(BitConverter.GetBytes(pcCamera.transform.position.x), 0, bytes, 0, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(pcCamera.transform.position.y), 0, bytes, 4, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(pcCamera.transform.position.z), 0, bytes, 8, 4);
 
-        //track.Metadata = bytes;
+
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                if (i % 4 == 0)
+                    foreach (byte b in Encoding.ASCII.GetBytes(" "))
+                        bytesList.Add(b);
+
+                bytesList.Add(bytes[i]);
+
+            }
+
+
+            track.Metadata = bytesList.ToArray();
+        }
+
+
+
+       
 
         RecordingTimerText.gameObject.SetActive(true);
     }
@@ -293,7 +322,9 @@ public class Recorder : MonoBehaviour
 
     private void Awake()
     {
-       // track = new Track();
+        DontDestroyOnLoad(gameObject);
+        GetRecorder = this;
+        track = new Track();
     }
 
 
@@ -306,9 +337,9 @@ public class Recorder : MonoBehaviour
         _filenameToSave = GetDefaultDatasetName();
         _recordingConfig.Mp4DatasetFilepath = _filenameToSave;
        
-        //track.Id = new System.Guid("cameraPosition");
+        track.Id = new System.Guid("cameraPosition");
 
-     //   _recordingConfig.Tracks = new List<Track>() { track };
+        _recordingConfig.Tracks = new List<Track>() { track };
 
 
         if (System.IO.File.Exists(Application.persistentDataPath + "/" + _defaultDatasetName))
