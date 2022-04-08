@@ -87,7 +87,7 @@ public class RawPointCloudBlender : MonoBehaviour
 
 
     public TextAsset Output;
-
+    private Recorder recorder;
     /// <summary>
     /// Resets the point cloud renderer.
     /// </summary>
@@ -122,16 +122,16 @@ public class RawPointCloudBlender : MonoBehaviour
     private void Awake()
     {
 
+        recorder = FindObjectOfType<Recorder>();
+    //    recorder.pcCamera = FindObjectOfType<Camera>().transform;
+
         if(!File.Exists(Application.persistentDataPath + path))
         {
             File.Create(Application.persistentDataPath + path);
         }
 
 
-        //FileStream fs = new FileStream(@'/pc.txt', );
-
         si = new StreamWriter(Application.persistentDataPath + path);
-
 
         Debug.Log(si);
     }
@@ -147,72 +147,31 @@ public class RawPointCloudBlender : MonoBehaviour
 
         Capture.onClick.AddListener(() => {
 
-            Texture2D tex = RTImage(Screen.width, Screen.height);
-            byte[] png = tex.EncodeToPNG();
+           // Texture2D tex = RTImage(Screen.width, Screen.height);
+          //  byte[] png = tex.EncodeToPNG();
 
         //    foreach (byte bajt in png)
         //        Debug.Log(bajt);
 
-
+           // recorder.
           //  Debug.Log("Prvi bajt: " + tex.EncodeToPNG());
 
             Debug.Log("Broj tacaka: " + _vertices.Length);
 
-            WritePointCloudToFile(si, path, _vertices, true);
+            recorder.OnRecordButtonTapped();
 
 
-            //    foreach(Vector3 vertex in _vertices)
-            //    {
-            //      Debug.Log(vertex.x + " " + vertex.y + " " + vertex.z);
-            //    }
+          //  if(recorder.Status == Recorder.RecorderStatus.Recording)
+          //  {
+                 // 4 bytes per float
 
+                
 
+          //  }
 
-            /*  string curFile = Application.persistentDataPath + "/points.txt";
-
-              if (File.Exists(curFile))
-              {
-                  string line;
-                  StreamReader be = new StreamReader(Application.persistentDataPath + "/points.txt");
-                  line = be.ReadLine();
-                 /* for (int i = 0; i < ach.Length; i++)
-                  {
-                      one = be.ReadLine();
-                      if (one == "True")
-                      {
-                          ach[i] = true;
-                      }
-                      else
-                      {
-                          ach[i] = false;
-                      }
-                  }*//*
-                  be.Close();
-              }
-              else
-              {
-                  StreamWriter ki = new StreamWriter(Application.persistentDataPath + "/points.txt");
-                  {
-                      // ki.WriteLine("");
-                      int no = 1;
-                      for(int i = 0; i < _vertices.Length; i++)
-                      {
-                          no++;
-                          if (no % 3 == 0)
-                          {
-                              ki.WriteLine(_vertices[i].x + " " + _vertices[i].y + " " + _vertices[i].z);
-                              no = 1;
-
-                          }
-                          // ki.WriteLine()
-                      }
-
-                      ki.Close();
-                  }
-              }
-
-              */
-
+            if(recorder.Status == Recorder.RecorderStatus.Stopped)
+                WritePointCloudToFile(si, path, _vertices, true);
+            
 
         });
 
@@ -229,6 +188,10 @@ public class RawPointCloudBlender : MonoBehaviour
         {
             throw new Exception("ConfidenceSlider is not assigned.");
         }
+
+      //  recorder.OnRecordButtonTapped();
+
+
     }
 
     private void Update()

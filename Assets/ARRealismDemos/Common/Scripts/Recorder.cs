@@ -18,6 +18,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -87,6 +88,8 @@ public class Recorder : MonoBehaviour
     // The status of the recorder.
     private RecorderStatus _status = RecorderStatus.Stopped;
 
+    public RecorderStatus Status { get { return _status; } }
+
     // The temporary filename to save for the recorder.
     private string _filenameToSave;
 
@@ -94,11 +97,16 @@ public class Recorder : MonoBehaviour
     private float _timeWhenRecorderStarts;
     private ARCoreRecordingConfig _recordingConfig = null;
 
+   // public Transform pcCamera;
+  //  private Track track;
+
+   // private byte[] bytes = new byte[12];
+
     /// <summary>
     /// Status of the recorder. Only one workflow is enabled at a time:
     /// 1) Stopped -> ReadyToRecord -> Recording -> Stopped.
     /// </summary>
-    protected enum RecorderStatus
+    public enum RecorderStatus
     {
         /// <summary>
         /// Initial state and the final state of exiting playback.
@@ -229,6 +237,18 @@ public class Recorder : MonoBehaviour
         Extensions.Session.enabled = true;
         _status = RecorderStatus.Recording;
         _timeWhenRecorderStarts = Time.time;
+
+
+      //  Debug.Log("camera: " + pcCamera);
+      //  Debug.Log("bytearray: " + bytes.Length);
+     //   Debug.Log("track: " + track);
+
+        //Buffer.BlockCopy(BitConverter.GetBytes(pcCamera.position.x), 0, bytes, 0, 4);
+        //Buffer.BlockCopy(BitConverter.GetBytes(pcCamera.position.y), 0, bytes, 4, 4);
+        //Buffer.BlockCopy(BitConverter.GetBytes(pcCamera.position.z), 0, bytes, 8, 4);
+
+        //track.Metadata = bytes;
+
         RecordingTimerText.gameObject.SetActive(true);
     }
 
@@ -270,6 +290,13 @@ public class Recorder : MonoBehaviour
         }
     }
 
+
+    private void Awake()
+    {
+       // track = new Track();
+    }
+
+
     /// <summary>
     /// Checks if there exists a pre-recorded dataset on start. If so, show the PlayBack button.
     /// </summary>
@@ -278,6 +305,11 @@ public class Recorder : MonoBehaviour
         _recordingConfig = ScriptableObject.CreateInstance<ARCoreRecordingConfig>();
         _filenameToSave = GetDefaultDatasetName();
         _recordingConfig.Mp4DatasetFilepath = _filenameToSave;
+       
+        //track.Id = new System.Guid("cameraPosition");
+
+     //   _recordingConfig.Tracks = new List<Track>() { track };
+
 
         if (System.IO.File.Exists(Application.persistentDataPath + "/" + _defaultDatasetName))
         {

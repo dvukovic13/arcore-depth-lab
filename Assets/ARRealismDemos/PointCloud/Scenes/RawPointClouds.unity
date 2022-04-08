@@ -1111,9 +1111,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Capture
-
-'
+  m_Text: Start/Stop
 --- !u!222 &1099021150
 CanvasRenderer:
   m_ObjectHideFlags: 0
