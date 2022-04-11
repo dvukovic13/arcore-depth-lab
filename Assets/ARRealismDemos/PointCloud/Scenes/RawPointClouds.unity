@@ -1120,6 +1120,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1099021147}
   m_CullTransparentMesh: 1
+--- !u!20 &1179916184 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 1557703158008231353, guid: 7a8ecf3d4912445268257c5eee428c32,
+    type: 3}
+  m_PrefabInstance: {fileID: 664176854}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1179916185 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2575652636521068524, guid: 7a8ecf3d4912445268257c5eee428c32,
@@ -1400,6 +1406,7 @@ MonoBehaviour:
   OffsetFromCamera: 1
   Capture: {fileID: 715252735}
   RecordingCamera: {fileID: 1468060620}
+  _currentCam: {fileID: 1179916184}
   Output: {fileID: 4900000, guid: eed638ae17cd66144b69cf60a9d41d8d, type: 3}
 --- !u!33 &1513632182
 MeshFilter:

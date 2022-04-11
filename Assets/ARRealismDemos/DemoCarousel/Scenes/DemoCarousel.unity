@@ -2239,6 +2239,8 @@ MonoBehaviour:
   CarouselUIToggle: {fileID: 302431279}
   Carousel3D: {fileID: 1707748816}
   RecordingTimerText: {fileID: 437321902}
+  ActiveCamera: {fileID: 1041236283}
+  bytes: 000000000000000000000000
 --- !u!1 &842128783
 GameObject:
   m_ObjectHideFlags: 0
@@ -3089,6 +3091,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1024722192}
   m_CullTransparentMesh: 0
+--- !u!20 &1041236283 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 1557703158008231353, guid: 7a8ecf3d4912445268257c5eee428c32,
+    type: 3}
+  m_PrefabInstance: {fileID: 866108687}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1064976677
 GameObject:
   m_ObjectHideFlags: 0

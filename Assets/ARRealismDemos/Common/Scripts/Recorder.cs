@@ -100,16 +100,16 @@ public class Recorder : MonoBehaviour
 
     // public Transform pcCamera;
     private Track track;
-    private Camera pcCamera;
+   // private Camera pcCamera;
 
 
     public static Recorder GetRecorder; //{ get { return this; } }
 
 
-    public Camera ActiveCamera { get { return pcCamera; } set { pcCamera = value; } }
+    public Camera ActiveCamera;// { get { return pcCamera; } set { pcCamera = value; } }
 
 
-    private byte[] bytes = new byte[12];
+    public byte[] bytes = new byte[12];
 
     private List<byte> bytesList = new List<byte>();// = new byte[12];
 
@@ -209,11 +209,19 @@ public class Recorder : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Obtains the default filename of the dataset.
-    /// </summary>
-    /// <returns>A string containing the current timestamp.</returns>
-    private string GetDefaultDatasetName()
+    public void WriteBytes()
+    {
+        foreach (byte b in bytes)
+            bytesList.Add(b);
+
+      //  track.Metadata = bytesList.ToArray();
+    }
+
+/// <summary>
+/// Obtains the default filename of the dataset.
+/// </summary>
+/// <returns>A string containing the current timestamp.</returns>
+private string GetDefaultDatasetName()
     {
         return Application.persistentDataPath + "/" + _defaultDatasetName;
     }
@@ -243,40 +251,17 @@ public class Recorder : MonoBehaviour
             _status = RecorderStatus.Stopped;
             yield break;
         }
+        
+
 
         ResetScenes();
+
+       
+
         yield return null;
         Extensions.Session.enabled = true;
         _status = RecorderStatus.Recording;
         _timeWhenRecorderStarts = Time.time;
-
-
-        Debug.Log("camera: " + pcCamera);
-
-        if(pcCamera != null)
-        {
-            Buffer.BlockCopy(BitConverter.GetBytes(pcCamera.transform.position.x), 0, bytes, 0, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(pcCamera.transform.position.y), 0, bytes, 4, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(pcCamera.transform.position.z), 0, bytes, 8, 4);
-
-
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                if (i % 4 == 0)
-                    foreach (byte b in Encoding.ASCII.GetBytes(" "))
-                        bytesList.Add(b);
-
-                bytesList.Add(bytes[i]);
-
-            }
-
-
-            track.Metadata = bytesList.ToArray();
-        }
-
-
-
-       
 
         RecordingTimerText.gameObject.SetActive(true);
     }
@@ -323,8 +308,8 @@ public class Recorder : MonoBehaviour
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
-        GetRecorder = this;
-        track = new Track();
+      //  GetRecorder = this;
+      //  track = new Track();
     }
 
 
@@ -336,10 +321,11 @@ public class Recorder : MonoBehaviour
         _recordingConfig = ScriptableObject.CreateInstance<ARCoreRecordingConfig>();
         _filenameToSave = GetDefaultDatasetName();
         _recordingConfig.Mp4DatasetFilepath = _filenameToSave;
+       // _recordingConfig.
        
-        track.Id = new System.Guid("cameraPosition");
+      //  track.Id = new System.Guid("cameraPosition");
 
-        _recordingConfig.Tracks = new List<Track>() { track };
+      //  _recordingConfig.Tracks = new List<Track>() { track };
 
 
         if (System.IO.File.Exists(Application.persistentDataPath + "/" + _defaultDatasetName))
@@ -373,6 +359,8 @@ public class Recorder : MonoBehaviour
             seconds -= minutes * 60.0f;
             RecordingTimerText.text = string.Format("{0:00}:{1:00}", (int)minutes, (int)seconds);
         }
+
+
     }
 
     /// <summary>

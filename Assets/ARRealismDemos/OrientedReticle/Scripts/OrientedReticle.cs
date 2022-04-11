@@ -119,8 +119,8 @@ public class OrientedReticle : MonoBehaviour
 
         if (!DepthSource.Initialized)
         {
-            Debug.LogError("Depth source is not initialized");
-            throw new InvalidOperationException("Depth source is not initialized");
+       //     Debug.LogError("Depth source is not initialized");
+         //   throw new InvalidOperationException("Depth source is not initialized");
         }
 
         short[] depthMap = DepthSource.DepthArray;
@@ -128,8 +128,8 @@ public class OrientedReticle : MonoBehaviour
 
         if (depthM <= DepthSource.InvalidDepthValue)
         {
-            Debug.LogError("Invalid depth value");
-            throw new InvalidOperationException("Invalid depth value");
+       //     Debug.LogError("Invalid depth value");
+        //    throw new InvalidOperationException("Invalid depth value");
         }
 
         Vector3 viewspacePoint = DepthSource.ComputeVertex(depthMapPoint, depthM);

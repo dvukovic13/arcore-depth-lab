@@ -198,7 +198,7 @@ public class MotionStereoDepthDataSource : IDepthDataSource
     {
         if (ARSession.state != ARSessionState.SessionTracking)
         {
-            Debug.LogWarningFormat("ARSession is not ready yet: {0}", ARSession.state);
+          //  Debug.LogWarningFormat("ARSession is not ready yet: {0}", ARSession.state);
             return;
         }
 
@@ -218,7 +218,7 @@ public class MotionStereoDepthDataSource : IDepthDataSource
         // Gets the camera parameters to create the required number of vertices.
         if (!_cameraManager.TryGetIntrinsics(out XRCameraIntrinsics cameraIntrinsics))
         {
-            Debug.LogError("MotionStereoDepthDataSource: Failed to obtain camera intrinsics.");
+           // Debug.LogError("MotionStereoDepthDataSource: Failed to obtain camera intrinsics.");
             return;
         }
 
@@ -236,7 +236,7 @@ public class MotionStereoDepthDataSource : IDepthDataSource
         if (_depthCameraIntrinsics.resolution != Vector2.zero)
         {
             _initialized = true;
-            Debug.Log("MotionStereoDepthDataSource intrinsics initialized.");
+          //  Debug.Log("MotionStereoDepthDataSource intrinsics initialized.");
         }
     }
 

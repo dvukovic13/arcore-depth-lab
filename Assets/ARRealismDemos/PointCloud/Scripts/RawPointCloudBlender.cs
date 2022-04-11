@@ -81,6 +81,9 @@ public class RawPointCloudBlender : MonoBehaviour
     private Material _pointCloudMaterial;
     private bool _cachedUseRawDepth = false;
 
+    [SerializeField]
+    private Camera _currentCam;
+
 
     private StreamWriter si;
     private const string path= "/pc.txt";
@@ -118,6 +121,36 @@ public class RawPointCloudBlender : MonoBehaviour
     }
 
 
+    private void SetBytesForWrite(ARCameraFrameEventArgs ev) {
+     //   ev.
+        
+        if(recorder != null)
+        {
+          //  Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.position.x), 0, recorder.bytes, 0, 4);
+            //Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.position.y), 0, recorder.bytes, 4, 4);
+           // Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.position.z), 0, recorder.bytes, 8, 4);
+
+
+        //    Debug.Log(recorder.ActiveCamera.transform.position);
+
+        //    if(_currentCam.transform.position != Vector3.zero)
+          //  {
+          //      Debug.Log("HIT: " + _currentCam.gameObject.scene.name);
+         //   }
+          //  Debug.Log("camPos: " + _currentCam.transform.localPosition);
+
+            foreach (byte b in recorder.bytes)
+            {
+                Debug.Log("Byte: " + b);
+
+            }
+
+           // recorder.WriteBytes();
+        }
+
+    }
+
+
 
     private void Awake()
     {
@@ -143,36 +176,16 @@ public class RawPointCloudBlender : MonoBehaviour
         _pointCloudMaterial = GetComponent<Renderer>().material;
         _cameraManager = FindObjectOfType<ARCameraManager>();
         _cameraManager.frameReceived += OnCameraFrameReceived;
-        
+      //  _cameraManager.frameReceived += SetBytesForWrite;
 
         Capture.onClick.AddListener(() => {
-
-           // Texture2D tex = RTImage(Screen.width, Screen.height);
-          //  byte[] png = tex.EncodeToPNG();
-
-        //    foreach (byte bajt in png)
-        //        Debug.Log(bajt);
-
-           // recorder.
-          //  Debug.Log("Prvi bajt: " + tex.EncodeToPNG());
-
-            Debug.Log("Broj tacaka: " + _vertices.Length);
 
             recorder.OnRecordButtonTapped();
 
 
-          //  if(recorder.Status == Recorder.RecorderStatus.Recording)
-          //  {
-                 // 4 bytes per float
-
-                
-
-          //  }
-
             if(recorder.Status == Recorder.RecorderStatus.Stopped)
                 WritePointCloudToFile(si, path, _vertices, true);
             
-
         });
 
 
@@ -189,13 +202,12 @@ public class RawPointCloudBlender : MonoBehaviour
             throw new Exception("ConfidenceSlider is not assigned.");
         }
 
-      //  recorder.OnRecordButtonTapped();
-
 
     }
 
     private void Update()
     {
+
         // Waits until Depth API is initialized.
         if (!_initialized && DepthSource.Initialized)
         {
@@ -220,15 +232,13 @@ public class RawPointCloudBlender : MonoBehaviour
             (float)_maxUpdateInvervalInSeconds,
             normalizedDeltaTime);
 
-
-        if(recorder == null)
+        
+        if (recorder == null)
         {
-            //recorder = Recorder.GetRecorder;
             recorder = FindObjectOfType<Recorder>();
-            recorder.ActiveCamera = FindObjectOfType<Camera>();
         }
-
-
+        
+       
     }
 
     void OnCameraFrameReceived(ARCameraFrameEventArgs eventArgs)
