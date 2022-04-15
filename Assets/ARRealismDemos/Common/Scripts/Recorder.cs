@@ -108,11 +108,6 @@ public class Recorder : MonoBehaviour
 
     public Camera ActiveCamera;// { get { return pcCamera; } set { pcCamera = value; } }
 
-
-    public byte[] bytes = new byte[12];
-
-    private List<byte> bytesList = new List<byte>();// = new byte[12];
-
     /// <summary>
     /// Status of the recorder. Only one workflow is enabled at a time:
     /// 1) Stopped -> ReadyToRecord -> Recording -> Stopped.
@@ -176,7 +171,7 @@ public class Recorder : MonoBehaviour
             _recordingManager.StopRecording();
             _status = RecorderStatus.Stopped;
             ResetScenes();
-
+            
         }
     }
 
@@ -209,13 +204,6 @@ public class Recorder : MonoBehaviour
         }
     }
 
-    public void WriteBytes()
-    {
-        foreach (byte b in bytes)
-            bytesList.Add(b);
-
-      //  track.Metadata = bytesList.ToArray();
-    }
 
 /// <summary>
 /// Obtains the default filename of the dataset.
@@ -256,7 +244,6 @@ private string GetDefaultDatasetName()
 
         ResetScenes();
 
-       
 
         yield return null;
         Extensions.Session.enabled = true;
@@ -308,8 +295,6 @@ private string GetDefaultDatasetName()
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
-      //  GetRecorder = this;
-      //  track = new Track();
     }
 
 
@@ -319,13 +304,9 @@ private string GetDefaultDatasetName()
     private void Start()
     {
         _recordingConfig = ScriptableObject.CreateInstance<ARCoreRecordingConfig>();
+        //Camera.main.GetComponent<ARCameraManager>().fra
         _filenameToSave = GetDefaultDatasetName();
         _recordingConfig.Mp4DatasetFilepath = _filenameToSave;
-       // _recordingConfig.
-       
-      //  track.Id = new System.Guid("cameraPosition");
-
-      //  _recordingConfig.Tracks = new List<Track>() { track };
 
 
         if (System.IO.File.Exists(Application.persistentDataPath + "/" + _defaultDatasetName))
@@ -335,6 +316,7 @@ private string GetDefaultDatasetName()
 
         _recordingManager = gameObject.AddComponent<ARRecordingManager>();
         _playbackManager = gameObject.AddComponent<ARPlaybackManager>();
+
     }
 
     /// <summary>

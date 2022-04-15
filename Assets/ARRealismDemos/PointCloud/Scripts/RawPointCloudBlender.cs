@@ -19,6 +19,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
@@ -50,7 +51,7 @@ public class RawPointCloudBlender : MonoBehaviour
     public Button Capture;
 
     // Limit the number of points to bound the performance cost of rendering the point cloud.
-    private const int _maxVerticesInBuffer = 1000000;
+    private const int _maxVerticesInBuffer = 400000;
     private const double _maxUpdateInvervalInSeconds = 0.5f;
     private const double _minUpdateInvervalInSeconds = 0.07f;
     private static readonly string _confidenceThresholdPropertyName = "_ConfidenceThreshold";
@@ -86,11 +87,23 @@ public class RawPointCloudBlender : MonoBehaviour
 
 
     private StreamWriter si;
-    private const string path= "/pc.txt";
+    private StreamWriter pi;
+    private StreamWriter ri;
+    private const string pcPath = "/pc.txt";
+    private const string posPath = "/cameraPos.txt";
+    private const string rotPath = "/cameraRot.txt";
 
 
     public TextAsset Output;
     private Recorder recorder;
+
+
+    private byte[] bytes = new byte[12];
+    private byte[] rotBytes = new byte[12];
+    private List<Vector3> posPts = new List<Vector3>();
+    private List<Vector3> rotPts = new List<Vector3>();
+
+
     /// <summary>
     /// Resets the point cloud renderer.
     /// </summary>
@@ -122,30 +135,24 @@ public class RawPointCloudBlender : MonoBehaviour
 
 
     private void SetBytesForWrite(ARCameraFrameEventArgs ev) {
-     //   ev.
         
         if(recorder != null)
         {
-          //  Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.position.x), 0, recorder.bytes, 0, 4);
-            //Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.position.y), 0, recorder.bytes, 4, 4);
-           // Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.position.z), 0, recorder.bytes, 8, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.position.x), 0, bytes, 0, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.position.y), 0, bytes, 4, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.position.z), 0, bytes, 8, 4);
+            
+            Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.eulerAngles.x), 0, rotBytes, 0, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.eulerAngles.y), 0, rotBytes, 4, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.eulerAngles.z), 0, rotBytes, 8, 4);
 
 
-        //    Debug.Log(recorder.ActiveCamera.transform.position);
-
-        //    if(_currentCam.transform.position != Vector3.zero)
-          //  {
-          //      Debug.Log("HIT: " + _currentCam.gameObject.scene.name);
-         //   }
-          //  Debug.Log("camPos: " + _currentCam.transform.localPosition);
-
-            foreach (byte b in recorder.bytes)
+            for(int i = 0; i < bytes.Length; i++)
             {
-                Debug.Log("Byte: " + b);
-
+                if(i % 4 == 3)
+                    posPts.Add(new Vector3(BitConverter.ToSingle(bytes, 0), BitConverter.ToSingle(bytes, 4), BitConverter.ToSingle(bytes, 8)));
+                    rotPts.Add(new Vector3(BitConverter.ToSingle(rotBytes, 0), BitConverter.ToSingle(rotBytes, 4), BitConverter.ToSingle(rotBytes, 8)));
             }
-
-           // recorder.WriteBytes();
         }
 
     }
@@ -155,16 +162,25 @@ public class RawPointCloudBlender : MonoBehaviour
     private void Awake()
     {
 
-       // recorder = Recorder.GetRecorder;
-      //  recorder.ActiveCamera = GameObject.Find("ARCamera").GetComponent<Camera>();
-
-        if(!File.Exists(Application.persistentDataPath + path))
+        if(!File.Exists(Application.persistentDataPath + pcPath))
         {
-            File.Create(Application.persistentDataPath + path);
+            File.Create(Application.persistentDataPath + pcPath);
+        }
+
+        if (!File.Exists(Application.persistentDataPath + posPath))
+        {
+            File.Create(Application.persistentDataPath + posPath);
+        } 
+        
+        if (!File.Exists(Application.persistentDataPath + rotPath))
+        {
+            File.Create(Application.persistentDataPath + rotPath);
         }
 
 
-        si = new StreamWriter(Application.persistentDataPath + path);
+        si = new StreamWriter(Application.persistentDataPath + pcPath);
+        pi = new StreamWriter(Application.persistentDataPath + posPath);
+        ri = new StreamWriter(Application.persistentDataPath + rotPath);
 
         Debug.Log(si);
     }
@@ -176,7 +192,7 @@ public class RawPointCloudBlender : MonoBehaviour
         _pointCloudMaterial = GetComponent<Renderer>().material;
         _cameraManager = FindObjectOfType<ARCameraManager>();
         _cameraManager.frameReceived += OnCameraFrameReceived;
-      //  _cameraManager.frameReceived += SetBytesForWrite;
+        _cameraManager.frameReceived += SetBytesForWrite;
 
         Capture.onClick.AddListener(() => {
 
@@ -184,8 +200,12 @@ public class RawPointCloudBlender : MonoBehaviour
 
 
             if(recorder.Status == Recorder.RecorderStatus.Stopped)
-                WritePointCloudToFile(si, path, _vertices, true);
-            
+            {
+                WritePointCloudToFile(si, pcPath, _vertices);
+                WritePositionsToFile(pi, posPath, posPts.ToArray());
+                WriteRotationsToFile(ri, rotPath, rotPts.ToArray());
+            }
+
         });
 
 
@@ -278,6 +298,7 @@ public class RawPointCloudBlender : MonoBehaviour
         image.GetPlane(2).data.CopyTo(_cameraBufferV);
     }
 
+
     private void WritePointCloudToFile(StreamWriter si, string path, Vector3[] vertices, bool autoclose = true)
     {
         Debug.Log(Application.persistentDataPath + path);
@@ -285,10 +306,42 @@ public class RawPointCloudBlender : MonoBehaviour
         {
             for(int i = 0; i < vertices.Length-1; i++)
             {
-                si.WriteLine((vertices[i].x.ToString("0.0000000") + " " + vertices[i].z.ToString("0.0000000") + " " + vertices[i].y.ToString("0.0000000") + " " + _colors[i].r/255f + " "  + _colors[i].g/255f + " " + _colors[i].b/255f).Replace(',', '.'));
+                si.WriteLine((vertices[i].x.ToString("0.0000000") + " " + vertices[i].z.ToString("0.0000000") + " " + vertices[i].y.ToString("0.0000000") + " " + _colors[i].r / 255f + " " + _colors[i].g / 255f + " " + _colors[i].b / 255f).Replace(',', '.'));
+                    
             }
 
             if(autoclose)
+                si.Close();
+        }
+    }
+    private void WritePositionsToFile(StreamWriter si, string path, Vector3[] vertices, bool autoclose = true)
+    {
+        //Debug.Log(Application.persistentDataPath + path);
+        if(File.Exists(Application.persistentDataPath + path))
+        {
+            for(int i = 0; i < vertices.Length-1; i++)
+            {
+                if (i % 3 == 2)
+                    si.WriteLine((vertices[i].x.ToString("0.0000000") + " " + vertices[i].z.ToString("0.0000000") + " " + vertices[i].y.ToString("0.0000000")).Replace(',', '.'));
+
+            }
+
+            if (autoclose)
+                si.Close();
+        }
+    }
+    private void WriteRotationsToFile(StreamWriter si, string path, Vector3[] vertices, bool autoclose = true)
+    {
+       // Debug.Log(Application.persistentDataPath + path);
+        if(File.Exists(Application.persistentDataPath + path))
+        {
+            for(int i = 0; i < vertices.Length-1; i++)
+            {
+                if (i % 12 == 11)
+                    si.WriteLine((vertices[i].x.ToString("0.0000000") + " " + vertices[i].z.ToString("0.0000000") + " " + vertices[i].y.ToString("0.0000000")));
+            }
+
+            if (autoclose)
                 si.Close();
         }
     }
@@ -379,9 +432,6 @@ public class RawPointCloudBlender : MonoBehaviour
                 ++_verticesIndex;
 
 
-              //  Debug.Log("X: " + vertex.x +" Y: " + vertex.y + " Z: " + vertex.z);
-
-
             }
         }
 
@@ -389,15 +439,6 @@ public class RawPointCloudBlender : MonoBehaviour
         {
             return;
         }
-
-
-
-
-     //   Debug.Log("Broj vertices: " + _verticesCount);
-    //    Debug.Log("Zadnja tacka: " + _vertices[_verticesCount-1]);
-
-
-      //  Debug.Log(_vertices[i]);
 
         // Assigns graphical buffers.
 #if UNITY_2019_3_OR_NEWER
