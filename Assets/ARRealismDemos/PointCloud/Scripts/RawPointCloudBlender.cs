@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
@@ -103,6 +104,8 @@ public class RawPointCloudBlender : MonoBehaviour
     private List<Vector3> posPts = new List<Vector3>();
     private List<Vector3> rotPts = new List<Vector3>();
 
+    private Allocator allocator = Allocator.Temp;
+    private NativeArray<XRCameraConfiguration> configurations = new NativeArray<XRCameraConfiguration>();
 
     /// <summary>
     /// Resets the point cloud renderer.
@@ -113,6 +116,9 @@ public class RawPointCloudBlender : MonoBehaviour
         _verticesIndex = 0;
     }
 
+
+
+    [Obsolete]
     private Texture2D RTImage(int mWidth, int mHeight)
     {
         Rect rect = new Rect(0, 0, mWidth, mHeight);
@@ -182,17 +188,29 @@ public class RawPointCloudBlender : MonoBehaviour
         pi = new StreamWriter(Application.persistentDataPath + posPath);
         ri = new StreamWriter(Application.persistentDataPath + rotPath);
 
-        Debug.Log(si);
     }
 
     private void Start()
     {
+
+     //   foreach(var a in allocator.get)
+
         _mesh = new Mesh();
         _mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         _pointCloudMaterial = GetComponent<Renderer>().material;
         _cameraManager = FindObjectOfType<ARCameraManager>();
         _cameraManager.frameReceived += OnCameraFrameReceived;
         _cameraManager.frameReceived += SetBytesForWrite;
+
+        configurations = _cameraManager.GetConfigurations(allocator);
+        Debug.Log(configurations.Length);
+
+        foreach (var config in configurations)
+            Debug.Log(config);
+
+        _cameraManager.currentConfiguration = new XRCameraConfiguration(configurations[configurations.Length-1].nativeConfigurationHandle, new Vector2Int(1080, 2440), 30);
+
+        Debug.Log(_cameraManager.currentConfiguration);
 
         Capture.onClick.AddListener(() => {
 
