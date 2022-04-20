@@ -152,13 +152,15 @@ public class RawPointCloudBlender : MonoBehaviour
             Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.eulerAngles.y), 0, rotBytes, 4, 4);
             Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.eulerAngles.z), 0, rotBytes, 8, 4);
 
+          //  posPts.Add(new Vector3(BitConverter.ToSingle(bytes, 0), BitConverter.ToSingle(bytes, 4), BitConverter.ToSingle(bytes, 8)));
+          //  rotPts.Add(new Vector3(BitConverter.ToSingle(rotBytes, 0), BitConverter.ToSingle(rotBytes, 4), BitConverter.ToSingle(rotBytes, 8)));
 
-            for(int i = 0; i < bytes.Length; i++)
-            {
-                if(i % 4 == 3)
-                    posPts.Add(new Vector3(BitConverter.ToSingle(bytes, 0), BitConverter.ToSingle(bytes, 4), BitConverter.ToSingle(bytes, 8)));
-                    rotPts.Add(new Vector3(BitConverter.ToSingle(rotBytes, 0), BitConverter.ToSingle(rotBytes, 4), BitConverter.ToSingle(rotBytes, 8)));
-            }
+             // for(int i = 0; i < bytes.Length; i++)
+            //  {
+                //  if(i % 4 == 3)
+                      posPts.Add(new Vector3(BitConverter.ToSingle(bytes, 0), BitConverter.ToSingle(bytes, 4), BitConverter.ToSingle(bytes, 8)));
+                      rotPts.Add(new Vector3(BitConverter.ToSingle(rotBytes, 0), BitConverter.ToSingle(rotBytes, 4), BitConverter.ToSingle(rotBytes, 8)));
+            //  }
         }
 
     }
@@ -339,7 +341,7 @@ public class RawPointCloudBlender : MonoBehaviour
         {
             for(int i = 0; i < vertices.Length-1; i++)
             {
-                if (i % 3 == 2)
+                //if (i % 3 == 2)
                     si.WriteLine((vertices[i].x.ToString("0.0000000") + " " + vertices[i].z.ToString("0.0000000") + " " + vertices[i].y.ToString("0.0000000")).Replace(',', '.'));
 
             }
@@ -355,7 +357,7 @@ public class RawPointCloudBlender : MonoBehaviour
         {
             for(int i = 0; i < vertices.Length-1; i++)
             {
-                if (i % 12 == 11)
+               // if (i % 12 == 11)
                     si.WriteLine((vertices[i].x.ToString("0.0000000") + " " + vertices[i].z.ToString("0.0000000") + " " + vertices[i].y.ToString("0.0000000")));
             }
 
