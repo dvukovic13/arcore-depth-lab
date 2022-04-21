@@ -144,23 +144,19 @@ public class RawPointCloudBlender : MonoBehaviour
         
         if(recorder != null)
         {
-            Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.position.x), 0, bytes, 0, 4);
+     /*       Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.position.x), 0, bytes, 0, 4);
             Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.position.y), 0, bytes, 4, 4);
             Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.position.z), 0, bytes, 8, 4);
             
             Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.eulerAngles.x), 0, rotBytes, 0, 4);
             Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.eulerAngles.y), 0, rotBytes, 4, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.eulerAngles.z), 0, rotBytes, 8, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(recorder.ActiveCamera.transform.eulerAngles.z), 0, rotBytes, 8, 4);*/
 
           //  posPts.Add(new Vector3(BitConverter.ToSingle(bytes, 0), BitConverter.ToSingle(bytes, 4), BitConverter.ToSingle(bytes, 8)));
           //  rotPts.Add(new Vector3(BitConverter.ToSingle(rotBytes, 0), BitConverter.ToSingle(rotBytes, 4), BitConverter.ToSingle(rotBytes, 8)));
 
-             // for(int i = 0; i < bytes.Length; i++)
-            //  {
-                //  if(i % 4 == 3)
-                      posPts.Add(new Vector3(BitConverter.ToSingle(bytes, 0), BitConverter.ToSingle(bytes, 4), BitConverter.ToSingle(bytes, 8)));
-                      rotPts.Add(new Vector3(BitConverter.ToSingle(rotBytes, 0), BitConverter.ToSingle(rotBytes, 4), BitConverter.ToSingle(rotBytes, 8)));
-            //  }
+            posPts.Add(recorder.ActiveCamera.transform.position);
+            rotPts.Add(recorder.ActiveCamera.transform.eulerAngles);
         }
 
     }
@@ -204,15 +200,15 @@ public class RawPointCloudBlender : MonoBehaviour
         _cameraManager.frameReceived += OnCameraFrameReceived;
         _cameraManager.frameReceived += SetBytesForWrite;
 
-        configurations = _cameraManager.GetConfigurations(allocator);
-        Debug.Log(configurations.Length);
+       // configurations = _cameraManager.GetConfigurations(allocator);
+        //Debug.Log(configurations.Length);
 
-        foreach (var config in configurations)
-            Debug.Log(config);
+        //foreach (var config in configurations)
+        //    Debug.Log(config);
 
-        _cameraManager.currentConfiguration = new XRCameraConfiguration(configurations[configurations.Length-1].nativeConfigurationHandle, new Vector2Int(1080, 2440), 30);
+       // _cameraManager.currentConfiguration = new XRCameraConfiguration(configurations[configurations.Length-1].nativeConfigurationHandle, new Vector2Int(1080, 2440), 30);
 
-        Debug.Log(_cameraManager.currentConfiguration);
+       // Debug.Log(_cameraManager.currentConfiguration);
 
         Capture.onClick.AddListener(() => {
 
